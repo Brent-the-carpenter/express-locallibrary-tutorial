@@ -6,12 +6,17 @@ const logger = require("morgan");
 
 const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
+const expressEjsLayouts = require("express-ejs-layouts");
 
 const app = express();
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
-app.set("view engine", "pug");
+app.set("view engine", "ejs");
+
+app.use(expressEjsLayouts);
+
+app.set("layout", "layout");
 
 app.use(logger("dev"));
 app.use(express.json());
@@ -35,7 +40,14 @@ app.use(function (err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render("error");
+  res.render("error", {
+    title: "Error Page",
+    message: "Something went wrong",
+    error: {
+      status: 500,
+      stack: "Error stack trace",
+    },
+  });
 });
 
 module.exports = app;

@@ -4,6 +4,7 @@ const router = express.Router();
 /* GET users listing. */
 router.get("/cool", function (req, res, next) {
   res.render("cool", {
+    title: "cool page",
     msg1: "You're so cool",
     msg2: "Don't worry man you will have a job coding soon enough!",
   });
