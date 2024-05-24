@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www",
-    "devstart": "node --watch ./bin/www",
+    "start": "node --env-file=.env ./bin/www",
+    "devstart": "node --watch --env-file=.env ./bin/www",
     "serverstart": "DEBUG=express-locallibrary-tutorial:* npm run devstart"
   },
   "dependencies": {
@@ -14,6 +14,7 @@
     "express": "^4.19.2",
     "express-ejs-layouts": "^2.5.1",
     "http-errors": "~1.6.3",
+    "mongoose": "^8.4.0",
     "morgan": "~1.9.1"
   }
 }
