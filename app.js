@@ -5,18 +5,21 @@ const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
+const catalogRouter = require("./routes/catalog");
 const expressEjsLayouts = require("express-ejs-layouts");
 const mongoose = require("mongoose");
 const { error } = require("console");
 
-const mongoURI = process.env.MONGO_DB_CLUSTER_URI;
+const mongoDB = process.env.MONGO_DB_CLUSTER_URI;
 const app = express();
 
+// Set up moongoose connection
 mongoose.set("strictQuery", false);
 main().catch((err) => console.log(err));
 async function main() {
-  await mongoose.connect(mongoURI);
+  await mongoose.connect(mongoDB);
 }
+
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
@@ -33,6 +36,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
+app.use("/catalog", catalogRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
