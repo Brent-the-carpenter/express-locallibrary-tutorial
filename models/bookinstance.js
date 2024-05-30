@@ -18,7 +18,10 @@ BookInstanceSchema.virtual("url").get(function () {
   // We don't use an arrow function as we'll need the this object
   return `/catalog/bookinstance/${this._id}`;
 });
-
+BookInstanceSchema.virtual("due_back_yyy_mm_dd").get(function () {
+  return DateTime.fromJSDate(this.due_back).toISODate();
+  // format 'YYYY-MM-DD'
+});
 BookInstanceSchema.virtual("due_date_formatted").get(function () {
   return DateTime.fromJSDate(this.due_back).toLocaleString(DateTime.DATE_FULL);
 });

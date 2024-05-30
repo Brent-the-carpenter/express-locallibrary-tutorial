@@ -1,0 +1,24 @@
+extends layout 
+
+block content 
+    
+    h1 #{title}: #{book.title}
+    p #[strong Author: ]
+        a(href=book.author.url) #{book.author.name}
+    
+        if book_copies.length 
+            p #[strong Delete the following book copies before attempting to delete the book.]
+            div(style='margin-left:20px;margin-top:20px')
+                h4 Book Copies
+                dl
+                    each book_copy in book_copies
+                        dt
+                            a(href=book_copy.url) #{book_copy.imprint}
+                        dd #{book_copy.status}
+        else
+            p Do you really want to delete this Book?
+            form(method='POST')
+                div.form-group
+                    input#bookid.form-control(type='hidden', name='bookid', value=book._id )
+
+                button.btn.btn-primary(type='submit') Delete
