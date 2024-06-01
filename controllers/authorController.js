@@ -2,6 +2,7 @@ const Author = require("../models/author");
 const Book = require("../models/book");
 const { body, validationResult } = require("express-validator");
 const asyncHandler = require("express-async-handler");
+const debug = require("debug")("author");
 
 // Display list of all Authors.
 exports.author_list = asyncHandler(async (req, res, next) => {
@@ -20,7 +21,7 @@ exports.author_detail = asyncHandler(async (req, res, next) => {
     Author.findById(req.params.id).exec(),
     Book.find({ author: req.params.id }, "title summary").exec(),
   ]);
-  console.log("getting author");
+  debug("getting author");
   if (author === null) {
     const err = new Error("Author not found");
     err.status = 404;
@@ -139,10 +140,63 @@ exports.author_delete_post = asyncHandler(async (req, res, next) => {
 
 // Display Author update form on GET.
 exports.author_update_get = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Author update GET");
+  // Get author
+  const author = await Author.findById(req.params.id);
+
+  res.render("author_form", {
+    title: "Update Author",
+    author: author,
+  });
 });
 
 // Handle Author update on POST.
-exports.author_update_post = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Author update POST");
-});
+exports.author_update_post = [
+  body("first_name")
+    .trim()
+    .isLength({ min: 1 })
+    .escape()
+    .withMessage("First name is required.")
+    .isAlphanumeric()
+    .withMessage("First name can only contain alpha numeric characters"),
+  body("family_name")
+    .trim()
+    .isLength({ min: 1 })
+    .escape()
+    .withMessage("Family name is required.")
+    .isAlphanumeric()
+    .withMessage("Family name can only contain alpha numeric characters"),
+  body("date_of_birth", "Invalid date of birth.")
+    .optional({ values: "falsy" })
+    .isISO8601()
+    .toDate(),
+  body("date_of_death", "Invalid date of death.")
+    .optional({ values: "falsy" })
+    .isISO8601()
+    .toDate(),
+
+  asyncHandler(async (req, res, next) => {
+    const errors = validationResult(req);
+
+    const updatedAuthor = new Author({
+      first_name: req.body.first_name,
+      family_name: req.body.family_name,
+      date_of_birth: req.body.date_of_birth,
+      date_of_death: req.body.date_of_death,
+      _id: req.params.id,
+    });
+
+    if (!errors.isEmpty()) {
+      // There are errors in the post request data send form back with sanitized data.
+      res.render("author_form", {
+        title: "Update Author",
+        author: updatedAuthor,
+        errors: errors.array(),
+      });
+      return;
+    } else {
+      // Data is valid and clean.
+      await Author.findByIdAndUpdate(req.body.id, updatedAuthor, {});
+      res.redirect(updatedAuthor.url);
+    }
+  }),
+];

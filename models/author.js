@@ -26,13 +26,26 @@ AuthorSchema.virtual("url").get(function () {
   return `/catalog/author/${this._id}`;
 });
 AuthorSchema.virtual("date_of_birth_formatted").get(function () {
-  return DateTime.fromJSDate(this.date_of_birth).toLocaleString(
-    DateTime.DATE_FULL
-  );
+  return DateTime.fromJSDate(this.date_of_birth)
+    .toUTC()
+    .toLocaleString(DateTime.DATE_FULL);
 });
 AuthorSchema.virtual("date_of_death_formatted").get(function () {
   return this.date_of_death
-    ? DateTime.fromJSDate(this.date_of_death).toLocaleString(DateTime.DATE_FULL)
+    ? DateTime.fromJSDate(this.date_of_death)
+        .toUTC()
+        .toLocaleString(DateTime.DATE_FULL)
+    : "";
+});
+
+AuthorSchema.virtual("date_of_birth_calender").get(function () {
+  return this.date_of_birth
+    ? DateTime.fromJSDate(this.date_of_birth).toUTC().toFormat("yyyy-MM-dd")
+    : "";
+});
+AuthorSchema.virtual("date_of_death_calender").get(function () {
+  return this.date_of_death
+    ? DateTime.fromJSDate(this.date_of_death).toUTC().toFormat("yyyy-MM-dd")
     : "";
 });
 

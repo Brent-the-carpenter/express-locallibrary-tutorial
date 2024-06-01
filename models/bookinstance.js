@@ -19,7 +19,7 @@ BookInstanceSchema.virtual("url").get(function () {
   return `/catalog/bookinstance/${this._id}`;
 });
 BookInstanceSchema.virtual("due_back_yyy_mm_dd").get(function () {
-  return DateTime.fromJSDate(this.due_back).toISODate();
+  return DateTime.fromJSDate(this.due_back).toUTC().toISODate();
   // format 'YYYY-MM-DD'
 });
 BookInstanceSchema.virtual("due_date_formatted").get(function () {

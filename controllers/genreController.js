@@ -6,7 +6,7 @@ const asyncHandler = require("express-async-handler");
 // Display list of all Genre.
 exports.genre_list = asyncHandler(async (req, res, next) => {
   const allGenres = await Genre.find().sort({ name: 1 }).exec();
-  console.log(allGenres);
+
   res.render("genre_list", {
     title: "Genre List",
     genre_list: allGenres,
@@ -22,7 +22,7 @@ exports.genre_detail = asyncHandler(async (req, res, next) => {
   ]);
   if (genre === null) {
     // No results.
-    console.log("no genre found");
+
     const err = new Error("Genre not found");
     err.status = 404;
     return next(err);
@@ -121,10 +121,52 @@ exports.genre_delete_post = asyncHandler(async (req, res, next) => {
 
 // Display Genre update form on GET.
 exports.genre_update_get = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Genre update GET");
+  const [genre, allBooksInGenre] = await Promise.all([
+    Genre.findById(req.params.id).exec(),
+    Books.find({ genre: req.params.id }, "title summary").sort({ title: 1 }),
+  ]);
+  if (genre === null) {
+    const err = new Error("Genre not found.");
+    err.status = 404;
+    next(err);
+  }
+  res.render("genre_form", {
+    title: "Update Genre",
+    genre: genre,
+    genre_books: allBooksInGenre,
+  });
 });
 
 // Handle Genre update on POST.
-exports.genre_update_post = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Genre update POST");
-});
+exports.genre_update_post = [
+  body("name")
+    .isLength({ min: 3 })
+    .escape()
+    .withMessage(
+      "Genre name is required and must be longer than three characters."
+    )
+    .isAlpha()
+    .withMessage("must only contain alpha characters."),
+  asyncHandler(async (req, res, next) => {
+    const errors = validationResult(req);
+    const updatedGenre = new Genre({
+      name: req.body.name,
+      _id: req.params.id, // This is very important in update request/ if not specfied db will assign new id =(
+    });
+    if (!errors.isEmpty()) {
+      // form validaiton failed send back form with user sanitized data.
+
+      res.render("genre_form", {
+        title: "Update Genre",
+        genre: updatedGenre,
+
+        errors: errors.array(),
+      });
+      return;
+    } else {
+      // Data is Good valid and sanitized
+      await Genre.findByIdAndUpdate(req.params.id, updatedGenre, {}).exec();
+      res.redirect(updatedGenre.url);
+    }
+  }),
+];
